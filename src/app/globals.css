@@ -1,0 +1,112 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   Variables globales & reset
+   ============================================================ */
+:root {
+  --font-geist-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
+  --font-geist-mono: "Geist Mono", ui-monospace, monospace;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  background-color: #0d0f14;
+  color: #e8eaf0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+}
+
+/* ============================================================
+   Scrollbar personnalisée (dark trading aesthetic)
+   ============================================================ */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: #0d0f14;
+}
+::-webkit-scrollbar-thumb {
+  background: #1e2535;
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #00e5ff33;
+}
+
+/* ============================================================
+   Animations staggered pour les cards
+   ============================================================ */
+.stagger-1 { animation-delay: 0ms; }
+.stagger-2 { animation-delay: 60ms; }
+.stagger-3 { animation-delay: 120ms; }
+.stagger-4 { animation-delay: 180ms; }
+.stagger-5 { animation-delay: 240ms; }
+.stagger-6 { animation-delay: 300ms; }
+
+/* ============================================================
+   Recharts overrides — fond transparent + couleurs dark
+   ============================================================ */
+.recharts-cartesian-grid-horizontal line,
+.recharts-cartesian-grid-vertical line {
+  stroke: #1e2535;
+  stroke-dasharray: 3 3;
+}
+
+.recharts-tooltip-wrapper {
+  outline: none !important;
+}
+
+.recharts-default-tooltip {
+  background: #131720 !important;
+  border: 1px solid #1e2535 !important;
+  border-radius: 8px !important;
+  font-size: 13px !important;
+}
+
+/* ============================================================
+   Numéros tabulaires pour l'alignement des données finan.
+   ============================================================ */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* ============================================================
+   Glow sur les valeurs positives / négatives
+   ============================================================ */
+.profit-glow {
+  text-shadow: 0 0 12px rgba(0, 230, 118, 0.4);
+}
+.loss-glow {
+  text-shadow: 0 0 12px rgba(255, 23, 68, 0.4);
+}
+
+/* ============================================================
+   Skeleton shimmer
+   ============================================================ */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    #131720 25%,
+    #1a2030 50%,
+    #131720 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 6px;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
