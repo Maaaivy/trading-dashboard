@@ -118,7 +118,7 @@ export function buildResultBuckets(
       const from = (buckets as Record<string, unknown>)[`__from_${label}`] as number
       const to = (buckets as Record<string, unknown>)[`__to_${label}`] as number
       if (result >= from && (result < to || result === max)) {
-        buckets[label]++
+        buckets[label] = (buckets[label] ?? 0) + 1
         break
       }
     }
