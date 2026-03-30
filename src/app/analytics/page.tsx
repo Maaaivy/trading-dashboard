@@ -1,7 +1,4 @@
 "use client"
-// ============================================================
-// app/analytics/page.tsx — Analytiques avancées
-// ============================================================
 import useSWR from "swr"
 import { BarChart3, AlertTriangle, TrendingUp, Layers } from "lucide-react"
 import { SectionHeader, SkeletonChart } from "@/components/ui/SectionHeader"
@@ -22,6 +19,18 @@ export default function AnalyticsPage() {
 
   const stats = data?.stats
 
+  // Normalise n'importe quel tableau breakdown vers BreakdownItem[]
+  function normalizeBreakdown(
+    arr: { asset?: string; setup?: string; session?: string; trades: number; pnl: number; winRate: number }[]
+  ) {
+    return arr.map((item) => ({
+      asset: item.asset ?? item.setup ?? item.session ?? "N/A",
+      trades: item.trades,
+      pnl: item.pnl,
+      winRate: item.winRate,
+    }))
+  }
+
   return (
     <div className="p-6 space-y-6 max-w-[1400px]">
       <div>
@@ -38,7 +47,6 @@ export default function AnalyticsPage() {
         </div>
       )}
 
-      {/* Distribution des résultats */}
       <div className="rounded-xl border border-surface-border bg-surface-card p-5 animate-fade-in">
         <SectionHeader
           title="Distribution des résultats"
@@ -52,7 +60,6 @@ export default function AnalyticsPage() {
         ) : null}
       </div>
 
-      {/* Breakdown par asset + session */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div className="rounded-xl border border-surface-border bg-surface-card p-5 animate-fade-in">
           <SectionHeader
@@ -63,7 +70,7 @@ export default function AnalyticsPage() {
           {isLoading ? (
             <div className="skeleton h-48 w-full" />
           ) : stats ? (
-            <AssetBreakdown data={stats.byAsset} />
+            <AssetBreakdown data={normalizeBreakdown(stats.byAsset)} />
           ) : null}
         </div>
 
@@ -77,17 +84,16 @@ export default function AnalyticsPage() {
             <div className="skeleton h-48 w-full" />
           ) : stats ? (
             stats.bySetup.length > 0 ? (
-              <AssetBreakdown data={stats.bySetup} />
+              <AssetBreakdown data={normalizeBreakdown(stats.bySetup)} />
             ) : (
               <p className="text-sm text-ink-tertiary py-8 text-center">
-                Renseigne la colonne "Setup" dans Notion pour voir ce breakdown
+                Renseigne la colonne Setup dans Notion pour voir ce breakdown
               </p>
             )
           ) : null}
         </div>
       </div>
 
-      {/* Performance par session + tableau récapitulatif */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div className="rounded-xl border border-surface-border bg-surface-card p-5 animate-fade-in">
           <SectionHeader
@@ -102,11 +108,10 @@ export default function AnalyticsPage() {
           ) : null}
         </div>
 
-        {/* Tableau récapitulatif des stats clés */}
         <div className="rounded-xl border border-surface-border bg-surface-card p-5 animate-fade-in">
           <SectionHeader
             title="Récapitulatif statistique"
-            subtitle="Tous les indicateurs en un coup d'œil"
+            subtitle="Tous les indicateurs en un coup d'oeil"
             icon={Layers}
           />
           {isLoading ? (
@@ -119,10 +124,10 @@ export default function AnalyticsPage() {
                   { label: "P&L total", value: `${stats.totalPnL >= 0 ? "+" : ""}${stats.totalPnL.toFixed(2)}`, suffix: "$", positive: stats.totalPnL >= 0 },
                   { label: "Meilleur trade", value: `+${stats.bestTrade.toFixed(2)}`, suffix: "$", positive: true },
                   { label: "Pire trade", value: stats.worstTrade.toFixed(2), suffix: "$", positive: false },
-                  { label: "Profit Factor", value: stats.profitFactor, suffix: "×", positive: stats.profitFactor >= 1 },
+                  { label: "Profit Factor", value: stats.profitFactor, suffix: "x", positive: stats.profitFactor >= 1 },
                   { label: "Max Drawdown", value: `-${stats.maxDrawdown.toFixed(2)}`, suffix: "$", positive: false },
-                  { label: "Pertes consécutives max", value: stats.maxConsecutiveLosses, suffix: "" },
-                  { label: "RR moyen réalisé", value: `${stats.avgRR}`, suffix: "R", positive: stats.avgRR >= stats.minRRForProfitability },
+                  { label: "Pertes consecutives max", value: stats.maxConsecutiveLosses, suffix: "" },
+                  { label: "RR moyen realise", value: `${stats.avgRR}`, suffix: "R", positive: stats.avgRR >= stats.minRRForProfitability },
                 ] as { label: string; value: string | number; suffix: string; positive?: boolean }[]
               ).map(({ label, value, suffix, positive }) => (
                 <div
@@ -130,18 +135,11 @@ export default function AnalyticsPage() {
                   className="flex items-center justify-between py-2 border-b border-surface-border/50 last:border-0"
                 >
                   <span className="text-xs text-ink-secondary">{label}</span>
-                  <span
-                    className={clsx(
-                      "text-xs font-semibold tabular-nums",
-                      positive === true
-                        ? "text-profit"
-                        : positive === false
-                          ? "text-loss"
-                          : "text-ink-primary"
-                    )}
-                  >
-                    {value}
-                    {suffix}
+                  <span className={clsx(
+                    "text-xs font-semibold tabular-nums",
+                    positive === true ? "text-profit" : positive === false ? "text-loss" : "text-ink-primary"
+                  )}>
+                    {value}{suffix}
                   </span>
                 </div>
               ))}
