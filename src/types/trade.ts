@@ -45,10 +45,8 @@ export interface TradeStats {
   resultBuckets: { label: string; count: number; pct: number }[]
   // Breakdown par asset
   byAsset: { asset: string; trades: number; pnl: number; winRate: number }[]
-  // Breakdown par setup
-  bySetup: { setup: string; trades: number; pnl: number; winRate: number }[]
-  // Breakdown par session
-  bySession: { session: string; trades: number; pnl: number; winRate: number }[]
+  bySetup: { asset: string; trades: number; pnl: number; winRate: number }[]
+  bySession: { asset: string; trades: number; pnl: number; winRate: number }[]
 }
 
 /** Réponse de l'API /api/trades */
