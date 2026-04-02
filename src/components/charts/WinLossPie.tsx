@@ -80,7 +80,7 @@ export function WinLossPie({ stats }: Props) {
             cy="50%"
             innerRadius={42}
             outerRadius={62}
-            paddingAngle={3}
+            paddingAngle={6}
             dataKey="value"
             strokeWidth={0}
           >

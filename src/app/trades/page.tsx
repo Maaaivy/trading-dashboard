@@ -1,10 +1,8 @@
 "use client"
-// ============================================================
-// app/trades/page.tsx — Historique complet des trades
-// ============================================================
 import useSWR from "swr"
-import { TableProperties, AlertTriangle, RefreshCw } from "lucide-react"
+import { TableProperties, AlertTriangle, RefreshCw, CalendarDays } from "lucide-react"
 import { TradeTable } from "@/components/trades/TradeTable"
+import { PnLCalendar } from "@/components/trades/PnLCalendar"
 import { SectionHeader, SkeletonChart } from "@/components/ui/SectionHeader"
 import type { TradesApiResponse } from "@/types/trade"
 
@@ -19,23 +17,15 @@ export default function TradesPage() {
 
   return (
     <div className="p-6 space-y-6 max-w-[1400px]">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-ink-primary">
-            Historique des trades
-          </h1>
+          <h1 className="text-xl font-semibold text-ink-primary">Historique des trades</h1>
           <p className="text-sm text-ink-tertiary mt-0.5">
-            {data
-              ? `${data.trades.length} trades importés depuis Notion`
-              : "Chargement…"}
+            {data ? `${data.trades.length} trades importés depuis Notion` : "Chargement…"}
           </p>
         </div>
-        <button
-          onClick={() => mutate()}
-          disabled={isLoading}
-          className="flex items-center gap-2 px-3 py-1.5 text-xs border border-surface-border rounded-lg text-ink-secondary hover:text-ink-primary hover:border-accent/30 transition-colors disabled:opacity-50"
-        >
+        <button onClick={() => mutate()} disabled={isLoading}
+          className="flex items-center gap-2 px-3 py-1.5 text-xs border border-surface-border rounded-lg text-ink-secondary hover:text-ink-primary hover:border-accent/30 transition-colors disabled:opacity-50">
           <RefreshCw size={12} className={isLoading ? "animate-spin" : ""} />
           Rafraîchir
         </button>
@@ -44,10 +34,25 @@ export default function TradesPage() {
       {error && (
         <div className="flex items-center gap-3 p-4 rounded-xl bg-loss/10 border border-loss/20 text-loss text-sm">
           <AlertTriangle size={16} />
-          Erreur lors du chargement des trades. Vérifiez votre connexion Notion.
+          Erreur lors du chargement des trades.
         </div>
       )}
 
+      {/* Calendrier PnL */}
+      <div className="rounded-xl border border-surface-border bg-surface-card p-5 animate-fade-in">
+        <SectionHeader
+          title="Calendrier P&L"
+          subtitle="Performance jour par jour"
+          icon={CalendarDays}
+        />
+        {isLoading ? (
+          <div className="skeleton h-64 w-full" />
+        ) : data?.trades ? (
+          <PnLCalendar trades={data.trades} />
+        ) : null}
+      </div>
+
+      {/* Tableau */}
       {isLoading ? (
         <SkeletonChart className="h-96" />
       ) : data?.trades ? (
