@@ -12,7 +12,7 @@ export default function TradesPage() {
   const { data, error, isLoading, mutate } = useSWR<TradesApiResponse>(
     "/api/trades",
     fetcher,
-    { refreshInterval: 5 * 60 * 1000 }
+    { refreshInterval: 30 * 1000, revalidateOnFocus : true }
   )
 
   return (

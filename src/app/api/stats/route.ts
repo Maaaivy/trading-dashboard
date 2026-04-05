@@ -7,7 +7,7 @@ import { fetchAllTrades } from "@/lib/notion"
 import { computeStats } from "@/lib/calculations"
 import type { StatsApiResponse } from "@/types/trade"
 
-export const revalidate = 300
+export const revalidate = 0
 
 export async function GET() {
   try {
@@ -21,7 +21,7 @@ export async function GET() {
 
     return NextResponse.json(response, {
       headers: {
-        "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",
+        "Cache-Control": "no-store, no-cache, must-revalidate",
       },
     })
   } catch (error) {

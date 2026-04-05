@@ -14,7 +14,7 @@ export default function AnalyticsPage() {
   const { data, error, isLoading } = useSWR<StatsApiResponse>(
     "/api/stats",
     fetcher,
-    { refreshInterval: 5 * 60 * 1000 }
+    { refreshInterval: 30 * 1000, revalidateOnFocus : true }
   )
 
   const stats = data?.stats

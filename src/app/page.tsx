@@ -26,7 +26,7 @@ export default function DashboardPage() {
   const { data, error, isLoading } = useSWR<StatsApiResponse>(
     "/api/stats",
     fetcher,
-    { refreshInterval: 5 * 60 * 1000 } // refresh toutes les 5 min
+    { refreshInterval: 30 * 1000, revalidateOnFocus : true } // refresh toutes les 5 min
   )
 
   const stats = data?.stats

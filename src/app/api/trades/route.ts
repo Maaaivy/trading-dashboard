@@ -7,7 +7,7 @@ import { fetchAllTrades } from "@/lib/notion"
 import type { TradesApiResponse } from "@/types/trade"
 
 // Revalidation toutes les 5 minutes côté Vercel (ISR)
-export const revalidate = 300
+export const revalidate = 0
 
 export async function GET() {
   try {
@@ -21,7 +21,7 @@ export async function GET() {
     return NextResponse.json(response, {
       headers: {
         // Cache HTTP de 5 min, révalidation en arrière-plan
-        "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",
+        "Cache-Control": "no-store, no-cache, must-revalidate",
       },
     })
   } catch (error) {
