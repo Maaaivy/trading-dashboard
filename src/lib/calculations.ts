@@ -136,19 +136,17 @@ export function buildResultBuckets(
 }
 
 // ============================================================
-// Breakdown par groupe (asset, setup, session)
+// Breakdown par groupe (asset, setup, session, timeframe, market)
 // ============================================================
 function buildBreakdown(
   trades: Trade[],
-  key: keyof Pick<Trade, "asset" | "setup" | "session">
+  key: "asset" | "setup" | "session" | "timeframe" | "market"
 ): { asset: string; trades: number; pnl: number; winRate: number }[] {
-  const map = new Map<
-    string,
-    { trades: number; wins: number; pnl: number }
-  >()
+  const map = new Map<string, { trades: number; wins: number; pnl: number }>()
 
   for (const trade of trades) {
     const val = (trade[key] as string | undefined) ?? "N/A"
+    if (!val || val === "N/A") continue
     if (!map.has(val)) map.set(val, { trades: 0, wins: 0, pnl: 0 })
     const entry = map.get(val)!
     entry.trades++
@@ -172,22 +170,23 @@ function buildBreakdown(
 export function computeStats(trades: Trade[]): TradeStats {
   if (trades.length === 0) {
     return {
-      totalTrades: 0, winCount: 0, lossCount: 0, breakevenCount: 0,
+      totalTrades: 0, openTrades: 0, closedTrades: 0, winCount: 0, lossCount: 0, breakevenCount: 0,
       winRate: 0, totalPnL: 0, avgWin: 0, avgLoss: 0, avgRR: 0,
       minRRForProfitability: 0, profitFactor: 0, maxDrawdown: 0,
       maxConsecutiveLosses: 0, avgResultPercent: 0, bestTrade: 0,
-      worstTrade: 0, equityCurve: [], resultBuckets: [],
-      byAsset: [], bySetup: [], bySession: [],
+      worstTrade: 0, avgDurationHours: 0, equityCurve: [], resultBuckets: [],
+      byAsset: [], bySetup: [], bySession: [], byTimeframe: [], byMarket: [],
     }
   }
 
-  const wins = trades.filter((t) => t.status === "Win")
-  const losses = trades.filter((t) => t.status === "Loss")
-  const breakevens = trades.filter((t) => t.status === "Breakeven")
+  const closedTrades = trades.filter((t) => t.status !== "Open")
+  const wins = closedTrades.filter((t) => t.status === "Win")
+  const losses = closedTrades.filter((t) => t.status === "Loss")
+  const breakevens = closedTrades.filter((t) => t.status === "Breakeven")
 
-  const winRate = parseFloat(
-    ((wins.length / trades.length) * 100).toFixed(1)
-  )
+  const winRate = closedTrades.length > 0
+    ? parseFloat(((wins.length / closedTrades.length) * 100).toFixed(1))
+    : 0
 
   const totalPnL = parseFloat(
     trades.reduce((s, t) => s + t.resultDollar, 0).toFixed(2)
@@ -237,10 +236,29 @@ export function computeStats(trades: Trade[]): TradeStats {
         )
       : 0
 
-  const results = trades.map((t) => t.resultDollar)
+  const results = closedTrades.map((t) => t.resultDollar)
+
+  // Trades ouverts vs fermés
+  const openTrades = trades.filter((t) => t.status === "Open")
+
+  // Durée moyenne des trades fermés
+  const durations = closedTrades
+    .map((t) => t.durationHours)
+    .filter((d): d is number => d !== undefined)
+  const avgDurationHours = durations.length > 0
+    ? parseFloat((durations.reduce((s, d) => s + d, 0) / durations.length).toFixed(1))
+    : 0
+
+  // Breakdown par timeframe
+  const byTimeframe = buildBreakdown(trades, "timeframe")
+
+  // Breakdown par market
+  const byMarket = buildBreakdown(trades, "market")
 
   return {
     totalTrades: trades.length,
+    openTrades: openTrades.length,
+    closedTrades: closedTrades.length,
     winCount: wins.length,
     lossCount: losses.length,
     breakevenCount: breakevens.length,
@@ -256,10 +274,13 @@ export function computeStats(trades: Trade[]): TradeStats {
     avgResultPercent,
     bestTrade: parseFloat(Math.max(...results).toFixed(2)),
     worstTrade: parseFloat(Math.min(...results).toFixed(2)),
+    avgDurationHours,
     equityCurve: buildEquityCurve(trades),
     resultBuckets: buildResultBuckets(trades),
     byAsset: buildBreakdown(trades, "asset"),
     bySetup: buildBreakdown(trades, "setup"),
     bySession: buildBreakdown(trades, "session"),
+    byTimeframe,
+    byMarket,
   }
 }

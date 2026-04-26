@@ -18,29 +18,28 @@ import { SectionHeader, SkeletonCard, SkeletonChart } from "@/components/ui/Sect
 import { PnLCurve } from "@/components/charts/PnLCurve"
 import { WinLossPie } from "@/components/charts/WinLossPie"
 import { RRChart } from "@/components/charts/RRChart"
-import type { StatsApiResponse } from "@/types/trade"
+import { OpenPositions } from "@/components/trades/OpenPositions"
+import { AssetBreakdown } from "@/components/charts/AssetBreakdown"
+import type { StatsApiResponse, TradesApiResponse } from "@/types/trade"
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json())
 
 export default function DashboardPage() {
-  const { data, error, isLoading } = useSWR<StatsApiResponse>(
+  // Remplace le useSWR existant par ces deux hooks
+  const { data: statsData, isLoading: statsLoading } = useSWR<StatsApiResponse>(
     "/api/stats",
     fetcher,
-    { refreshInterval: 30 * 1000, revalidateOnFocus : true } // refresh toutes les 5 min
+    { refreshInterval: 60 * 1000, revalidateOnFocus: true }
   )
 
-  const stats = data?.stats
+  const { data: tradesData, isLoading: tradesLoading } = useSWR<TradesApiResponse>(
+    "/api/trades",
+    fetcher,
+    { refreshInterval: 60 * 1000, revalidateOnFocus: true }
+  )
 
-  if (error) {
-    return (
-      <div className="p-8 flex items-center gap-3 text-loss">
-        <AlertTriangle size={18} />
-        <span className="text-sm">
-          Erreur de connexion Notion — vérifier vos variables d'environnement.
-        </span>
-      </div>
-    )
-  }
+  const stats = statsData?.stats
+  const isLoading = statsLoading || tradesLoading
 
   return (
     <div className="p-6 space-y-8 max-w-[1400px]">
@@ -49,8 +48,8 @@ export default function DashboardPage() {
         <div>
           <h1 className="text-xl font-semibold text-ink-primary">Dashboard</h1>
           <p className="text-sm text-ink-tertiary mt-0.5">
-            {data?.lastFetched
-              ? `Mis à jour ${new Date(data.lastFetched).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}`
+            {statsData?.lastFetched
+              ? `Mis à jour ${new Date(statsData.lastFetched).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}`
               : "Chargement…"}
           </p>
         </div>
@@ -133,7 +132,30 @@ export default function DashboardPage() {
               variant={stats.maxConsecutiveLosses <= 3 ? "default" : "loss"}
               animDelay={420}
             />
+            <KPICard
+              label="Positions ouvertes"
+              value={stats.openTrades}
+              subValue={stats.openTrades > 0 ? "En cours" : "Aucune position active"}
+              icon={Activity}
+              variant={stats.openTrades > 0 ? "accent" : "default"}
+              trend={stats.openTrades > 0 ? "neutral" : undefined}
+              animDelay={480}
+            />
           </>
+        ) : null}
+      </div>
+
+      {/* Positions ouvertes */}
+      <div className="rounded-xl border border-surface-border bg-surface-card p-5 animate-fade-in">
+        <SectionHeader
+          title="Positions ouvertes"
+          subtitle="Trades sans date de clôture"
+          icon={Activity}
+        />
+        {isLoading ? (
+          <div className="skeleton h-24 w-full" />
+        ) : tradesData?.openTrades ? (
+          <OpenPositions trades={tradesData.openTrades} />
         ) : null}
       </div>
 
@@ -148,6 +170,20 @@ export default function DashboardPage() {
           <div className="skeleton h-52 w-full" />
         ) : stats ? (
           <PnLCurve equityCurve={stats.equityCurve} />
+        ) : null}
+      </div>
+
+      {/* Breakdown par asset */}
+      <div className="rounded-xl border border-surface-border bg-surface-card p-5 animate-fade-in">
+        <SectionHeader
+          title="Performance par asset"
+          subtitle="P&L et winrate — tous assets"
+          icon={BarChart2}
+        />
+        {isLoading ? (
+          <div className="skeleton h-48 w-full" />
+        ) : stats ? (
+          <AssetBreakdown data={stats.byAsset} />
         ) : null}
       </div>
 

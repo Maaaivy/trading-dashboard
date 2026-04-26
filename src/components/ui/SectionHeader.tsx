@@ -70,17 +70,32 @@ export function SkeletonChart({ className }: { className?: string }) {
 }
 
 // ============================================================
-// Indicateur de statut (Win / Loss / Breakeven)
+// Indicateur de statut (Win / Loss / Breakeven / Open)
 // ============================================================
 export function StatusBadge({
   status,
 }: {
-  status: "Win" | "Loss" | "Breakeven"
+  status: "Win" | "Loss" | "Breakeven" | "Open"
 }) {
   const styles = {
     Win: "bg-profit/10 text-profit border border-profit/20",
     Loss: "bg-loss/10 text-loss border border-loss/20",
     Breakeven: "bg-neutral/10 text-neutral border border-neutral/20",
+    Open: "bg-accent/10 text-accent border border-accent/20",
+  }
+
+  const dots = {
+    Win: "bg-profit",
+    Loss: "bg-loss",
+    Breakeven: "bg-neutral",
+    Open: "bg-accent animate-pulse-slow",
+  }
+
+  const labels = {
+    Win: "Win",
+    Loss: "Loss",
+    Breakeven: "BE",
+    Open: "Open",
   }
 
   return (
@@ -90,15 +105,8 @@ export function StatusBadge({
         styles[status]
       )}
     >
-      <span
-        className={clsx(
-          "w-1.5 h-1.5 rounded-full",
-          status === "Win" && "bg-profit",
-          status === "Loss" && "bg-loss",
-          status === "Breakeven" && "bg-neutral"
-        )}
-      />
-      {status}
+      <span className={clsx("w-1.5 h-1.5 rounded-full", dots[status])} />
+      {labels[status]}
     </span>
   )
 }

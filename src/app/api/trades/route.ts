@@ -12,9 +12,11 @@ export const revalidate = 0
 export async function GET() {
   try {
     const trades = await fetchAllTrades()
+    const openTrades = trades.filter((t) => t.status === "Open")
 
     const response: TradesApiResponse = {
       trades,
+      openTrades,
       lastFetched: new Date().toISOString(),
     }
 

@@ -1,81 +1,87 @@
 // ============================================================
-// Types principaux de l'application
+// types/trade.ts — Types mis à jour pour swing/position trading
 // ============================================================
 
-/** Un trade tel que stocké dans Notion et consommé par l'app */
 export interface Trade {
   id: string
   name: string
-  date: string           // ISO 8601
+  date: string           // Fallback legacy
+  entryDate: string      // Nouveau — date+heure d'entrée
+  exitDate?: string      // Vide = position encore ouverte
   asset: string
   direction: "Long" | "Short"
   entryPrice: number
   exitPrice: number
   stopLoss: number
   takeProfit: number
-  resultDollar: number   // P&L en $ (négatif = perte)
-  resultPercent: number  // P&L en % du capital risqué
-  status: "Win" | "Loss" | "Breakeven"
-  session?: string       // "London" | "New York" | "Asian"
-  setup?: string         // "Breakout" | "Reversal" | "Trend" | etc.
+  resultDollar: number
+  resultPercent: number
+  status: "Win" | "Loss" | "Breakeven" | "Open"
+  timeframe?: string
+  market?: "Spot" | "Futures"
+  session?: string
+  setup?: string
   notes?: string
+  // Calculé à la volée
+  durationHours?: number
 }
 
-/** KPIs calculés depuis la liste de trades */
 export interface TradeStats {
   totalTrades: number
+  openTrades: number        // Nouveau
+  closedTrades: number      // Nouveau
   winCount: number
   lossCount: number
   breakevenCount: number
-  winRate: number          // 0-100
+  winRate: number
   totalPnL: number
   avgWin: number
   avgLoss: number
-  avgRR: number            // Risk/Reward moyen réalisé
-  minRRForProfitability: number  // RR min pour être rentable avec ce winrate
-  profitFactor: number     // somme gains / somme pertes
-  maxDrawdown: number      // drawdown max en $
+  avgRR: number
+  minRRForProfitability: number
+  profitFactor: number
+  maxDrawdown: number
   maxConsecutiveLosses: number
   avgResultPercent: number
   bestTrade: number
   worstTrade: number
-  // Série chronologique pour la courbe cumulative
+  avgDurationHours: number  // Nouveau
+  // Breakdowns
   equityCurve: { date: string; cumPnL: number; trade: number }[]
-  // Distribution pour l'histogramme
   resultBuckets: { label: string; count: number; pct: number }[]
-  // Breakdown par asset
   byAsset: { asset: string; trades: number; pnl: number; winRate: number }[]
   bySetup: { asset: string; trades: number; pnl: number; winRate: number }[]
   bySession: { asset: string; trades: number; pnl: number; winRate: number }[]
+  byTimeframe: { asset: string; trades: number; pnl: number; winRate: number }[]  // Nouveau
+  byMarket: { asset: string; trades: number; pnl: number; winRate: number }[]     // Nouveau
 }
 
-/** Réponse de l'API /api/trades */
 export interface TradesApiResponse {
   trades: Trade[]
+  openTrades: Trade[]     // Nouveau — positions ouvertes séparées
   lastFetched: string
 }
 
-/** Réponse de l'API /api/stats */
 export interface StatsApiResponse {
   stats: TradeStats
   lastFetched: string
 }
 
-/** Filtres appliqués au tableau des trades */
 export interface TradeFilters {
   asset?: string
   direction?: "Long" | "Short"
-  status?: "Win" | "Loss" | "Breakeven"
+  status?: "Win" | "Loss" | "Breakeven" | "Open"
   session?: string
   setup?: string
+  timeframe?: string
+  market?: "Spot" | "Futures"
   dateFrom?: string
   dateTo?: string
   search?: string
 }
 
-/** Ordre de tri du tableau */
 export type SortField = keyof Pick<
   Trade,
-  "date" | "asset" | "resultDollar" | "resultPercent" | "status" | "direction"
->
+  "date" | "asset" | "resultDollar" | "resultPercent" | "status" | "direction" | "durationHours"
+>;
 export type SortDirection = "asc" | "desc"
