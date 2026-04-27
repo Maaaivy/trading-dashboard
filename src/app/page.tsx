@@ -132,15 +132,6 @@ export default function DashboardPage() {
               variant={stats.maxConsecutiveLosses <= 3 ? "default" : "loss"}
               animDelay={420}
             />
-            <KPICard
-              label="Positions ouvertes"
-              value={stats.openTrades}
-              subValue={stats.openTrades > 0 ? "En cours" : "Aucune position active"}
-              icon={Activity}
-              variant={stats.openTrades > 0 ? "accent" : "default"}
-              trend={stats.openTrades > 0 ? "neutral" : undefined}
-              animDelay={480}
-            />
           </>
         ) : null}
       </div>
