@@ -114,7 +114,7 @@ export async function fetchAllTrades(): Promise<Trade[]> {
     for (const page of response.results) {
       if ("properties" in page) {
         const trade = pageToTrade(page as PageObjectResponse)
-        if (trade.asset && (trade.date || trade.entryDate)) {
+        if (trade.date || trade.entryDate) {
           trades.push(trade)
         }
       }
