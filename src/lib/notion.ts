@@ -65,7 +65,7 @@ function pageToTrade(page: PageObjectResponse): Trade {
   if (rawStatus === "Loss") status = "Loss"
   else if (rawStatus === "Breakeven") status = "Breakeven"
   else if (rawStatus === "Win") status = "Win"
-}
+
 
   const market = getSelect(p, "Market")
 
