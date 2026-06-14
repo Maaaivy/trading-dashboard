@@ -62,12 +62,10 @@ function pageToTrade(page: PageObjectResponse): Trade {
 
   // Déterminer le statut — position ouverte si pas d'Exit Date
   let status: Trade["status"] = "Open"
-  if (exitDate) {
-    status = rawStatus === "Loss" ? "Loss"
-      : rawStatus === "Breakeven" ? "Breakeven"
-      : rawStatus === "Win" ? "Win"
-      : "Open"
-  }
+  if (rawStatus === "Loss") status = "Loss"
+  else if (rawStatus === "Breakeven") status = "Breakeven"
+  else if (rawStatus === "Win") status = "Win"
+}
 
   const market = getSelect(p, "Market")
 
